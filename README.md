@@ -7,17 +7,17 @@ The project addresses the growing field of reinforcement learning regarding a se
 Due to the inherent nature of reinforcement learning, all the “data” is obtained via present state stimuli. What this means is that at any given state (in the case of a video game this is a frame) important information is passed through a model (usually a neural network) to dictate the agent’s decision. This is all to say, no outside data will be used. However, significant computation power will be used to run the video game and subsequent neural network at each frame. This may cause marginal game lag. 
 
 ## Related Work
-Since I am created a brand-new video game from scratch, there is no previous work done on exactly my project. However, there is a lot of tangential work that I will be referencing to assist me on my own reinforcement learning project. In particular, there is a project that uses reinforcement learning on the popular game, [Snake](https://www.youtube.com/watch?v=-NJ9frfAWRo). 
+Since I am creating a brand-new video game from scratch, there is no previous work done on my project. However, there is a lot of tangential work that I will be referencing to assist me. There is a project that uses reinforcement learning on the popular game, [Snake](https://www.youtube.com/watch?v=-NJ9frfAWRo). 
 
 ## Tools and Skills
-This project will involve extensive knowledge of 2 Python packages, PyGame for the video game and Tensorflow for deep learning. Since Tensorflow is part of the curriculum for this course, that is where knowledge learned for this course is relevant. Also in a general sense, data wrangling using Pandas and visualization using Seaborn for presentation purposes will be useful. 
+This project will involve extensive knowledge of PyGame for the video game and TensorFlow for deep learning. My knowledge for TensorFlow will be from this course and my knowledge for PyGame comes from a previous project. Also in a general sense, data wrangling using Pandas and visualization using Seaborn will be useful. While there is no data in a traditional sense, stimuli will need to be processed in a manner feedable to a model. Seaborn will also created informative visualizations comparing model performance on each level. 
 
 ## Learning
-Since this will be my first-time implementing reinforcement learning from scratch on my own video game, it’s sufficient to say that I will learn a ton about reinforcement learning. I have a grasp on reinforcement learning, but general knowledge and the knowledge it takes to put it into practice are 2 entirely different things. As I come across roadblocks and problems, my knowledge in both reinforcement learning and deep learning will deepen. 
+Since this will be my first time implementing reinforcement learning from scratch on my own video game, I will learn a lot about reinforcement learning through trial and error. While I have a grasp on reinforcement learning from a previous course, the knowledge it takes to put something into practice is entirely different. As I come across roadblocks and problems, my knowledge in both reinforcement learning and deep learning in general will deepen. 
 
 ## Group
-I am currently working on this individually, but I believe Michael Papagni may join my group eventually. Regardless here is the tentative timeline: 
+I am currently working on this individually, but I believe Michael Papagni may be a part of my group. Regardless here is the tentative timeline: 
 
--	End of Week 7: I have a fully functional 2D platformer with at least 5 levels, but without any reinforcement learning
--	End of Week 8: I have a rough skeleton of classes each in their own python file. There should be 3 1 contains a class for game code, 1 contains a class for deep learning code, and 1 imports both classes to use in sync with each other for reinforcement learning. 
--	End of Week 9: I have a fully functional reinforcement learning algorithm in which the agent is able to complete each level in reasonable time. 
+-	End of Week 6: I have a fully functional 2D platformer with at least 5 levels, but without any reinforcement learning
+-	End of Week 7: I have a rough skeleton of classes, each in their own python file. There should be 1 that contains a class for game code, 1 that contains a class for deep learning code, and 1 that imports both classes to use in sync with each other for implementation. 
+-	End of Week 9: I have a fully functional reinforcement learning algorithm in which the agent can complete each level in reasonable time. 
