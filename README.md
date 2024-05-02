@@ -20,4 +20,7 @@ I am currently working on this individually, but I believe Michael Papagni may b
 
 -	End of Week 6: I have a fully functional 2D platformer with at least 5 levels, but without any reinforcement learning
 -	End of Week 7: I have a rough skeleton of classes, each in their own python file. There should be 1 that contains a class for game code, 1 that contains a class for deep learning code, and 1 that imports both classes to use in sync with each other for implementation. 
--	End of Week 9: I have a fully functional reinforcement learning algorithm in which the agent can complete each level in reasonable time. 
+-	End of Week 9: I have a fully functional reinforcement learning algorithm in which the agent can complete each level in reasonable time.
+
+## Link
+https://github.com/stephenyu2/pic16b-final-project
