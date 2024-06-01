@@ -4,6 +4,7 @@ pygame.init()
 backround_color = (135, 206, 235)
 width = 600
 height = 600
+floor_height = 160
 fps = 60
 velocity = 4
 window = pygame.display.set_mode((width,height))
@@ -129,7 +130,7 @@ class Player(pygame.sprite.Sprite):
     def draw(self, window, screen_offset):
         window.blit(self.sprite, (self.rect.x - screen_offset,self.rect.y))
 
-def Game(window):
+def Game(window, level = 1):
     pygame.display.set_caption("1 million Kirby's fail at walking")
     clock = pygame.time.Clock()
     kirbypng = pygame.image.load("kirby.png").convert_alpha()
@@ -162,8 +163,22 @@ def Game(window):
         animation_dict[name+"left"] = [pygame.transform.flip(sprite,True,False) for sprite in animation_dict[name]]
 
     player = Player(64,256,64,64,animation_dict)
-    obstacles = [SquareBlock(384,height-128, 64), Flag(512,height-64-128,64,128)]
-    floor = [SquareBlock(64*i, height-64,64) for i in range(25)]
+    if level == 1: 
+        obstacles = [SquareBlock(384,height-floor_height-64, 64), 
+                     Flag(512,height-64-floor_height-64,64,128)]
+        floor = [SquareBlock(64*i, height-floor_height,64) for i in range(10)]
+    elif level == 2: 
+        obstacles = [SquareBlock(256,height-floor_height-64, 64), 
+                     SquareBlock(256+64,height-floor_height-64-64, 64), 
+                     SquareBlock(256+64+64,height-floor_height-64-64, 64), 
+                     Flag(256+64+64,height-64-floor_height-64-64-64,64,128)]
+        floor = [SquareBlock(64*i, height-floor_height,64) for i in range(10)]
+    elif level == 3: 
+        obstacles = [SquareBlock(256+64,height-floor_height-64, 64), 
+                     SquareBlock(256,height-floor_height+64, 64), 
+                     Flag(256+(64*4),height-floor_height-64-64,64,128)]
+        floor = [SquareBlock(64*i, height-floor_height,64) for i in range(10) if i != 4]
+
     
     screen_offset = 0
 
@@ -202,4 +217,4 @@ def Game(window):
     
 
             
-Game(window)
+Game(window, level = 3)
