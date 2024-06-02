@@ -61,7 +61,7 @@ def mutate(models):
          for i in range(4):
               for weight in weights[i]:
                    if random.choice([0,1]):
-                        weight += random.normalvariate(0,.05)
+                        weight += random.normalvariate(0,.01)
          model.layers[0].set_weights(weights[0:2])
          model.layers[1].set_weights(weights[2:4])
          mutated.append(model)
