@@ -1,4 +1,5 @@
 import pygame
+import numpy as np
 pygame.init()
 
 backround_color = (135, 206, 235)
@@ -54,6 +55,8 @@ class Player(pygame.sprite.Sprite):
         self.sprites = sprites
         self.flag_x = flag_x
         self.flag_y = flag_y
+        self.died = False
+        self.time = 0
 
     def jump(self):
         self.v_y = -7
@@ -129,7 +132,7 @@ class Player(pygame.sprite.Sprite):
     def draw(self, window, screen_offset):
         window.blit(self.sprite, (self.rect.x - screen_offset,self.rect.y))
 
-def Game(window,model):
+def Game(window,models):
     pygame.display.set_caption("1 million Kirby's fail at walking")
     clock = pygame.time.Clock()
     kirbypng = pygame.image.load("kirby.png").convert_alpha()
@@ -161,52 +164,72 @@ def Game(window,model):
         animation_dict[name+"right"] = animation_dict[name]
         animation_dict[name+"left"] = [pygame.transform.flip(sprite,True,False) for sprite in animation_dict[name]]
 
-    player = Player(64,256,64,64,animation_dict,512,height-64-128)
+    players = [Player(64,256,64,64,animation_dict,512,height-64-128) for i in range(len(models))]
     obstacles = [SquareBlock(384,height-128, 64), Flag(512,height-64-128,64,128)]
     floor = [SquareBlock(64*i, height-64,64) for i in range(25)]
     
+    player_array = np.array([models, players])
+    winning_players = []
     screen_offset = 0
     time_limit = 150
     time = 0
-    died = False
 
     run = True
     while run:
-        time+=1
+        time +=1
         clock.tick(fps)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
                 break
-    
-        keys = model.predict([[player.rect.x,player.rect.y,player.v_x,player.v_y,int(player.canjump),player.flag_x,player.flag_y]])
         
-        if keys[0,2]>.5 and player.canjump:
-            player.jump()
-            player.canjump = False
-
-        player.next_frame(fps)
-        player.check_collision(floor+obstacles,keys)
-
         window.fill(backround_color)
-        player.draw(window, screen_offset)
+        
+        to_delete = []
+        for i in range(len(player_array[0,:])):
+        
+            keys = player_array[0,i].predict([[player_array[1,i].rect.x,player_array[1,i].rect.y,player_array[1,i].v_x,player_array[1,i].v_y,int(player_array[1,i].canjump),player_array[1,i].flag_x,player_array[1,i].flag_y]])
+        
+            if keys[0,2]>.5 and player_array[1,i].canjump:
+                player_array[1,i].jump()
+                player_array[1,i].canjump = False
+
+            player_array[1,i].next_frame(fps)
+            player_array[1,i].check_collision(floor+obstacles,keys)
+
+            player_array[1,i].draw(window, screen_offset)
+            player_array[1,i].time += 1
+            if player_array[1,i].win:
+                to_delete.append(i)
+        
+        for i in to_delete:
+            winning_players.append(player_array[:,i])
+            player_array = np.delete(player_array,i,1)
+
+
+
         for object in obstacles+floor:
             object.draw(window, screen_offset)
         pygame.display.update()
 
-        if (player.rect.right - screen_offset) > width - 150 and player.v_x > 0:
-            screen_offset += player.v_x
-        if (player.rect.left - screen_offset) < 150 and player.v_x < 0:
-            screen_offset += player.v_x
+        camera_tracked = player_array[1,np.argmax([player.rect.right for player in player_array[1,:]])]
+
+        if (camera_tracked.rect.right - screen_offset) > width - 150 and camera_tracked.v_x > 0:
+            screen_offset += camera_tracked.v_x
+        if (camera_tracked.rect.left - screen_offset) < 150 and camera_tracked.v_x < 0:
+            screen_offset += camera_tracked.v_x
         
-        if player.rect.y > height:
-            run = False
-            died = True
+        for i in range(len(player_array[1,:])):
 
-        if time > time_limit or player.win:
+            if player_array[1,i].rect.y > height:
+                player_array[1,i].died = True
+
+        if time > time_limit:
             run = False
 
-    return ((player.win,player.rect.x,time,died))
+        
+    player_array = np.concatenate((player_array,np.array(winning_players).T),axis = 1)
+    return [[player.win,player.rect.x,time,player.died] for player in player_array[1,:]]
     pygame.quit()
     quit()           
     
