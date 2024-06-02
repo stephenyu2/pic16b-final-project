@@ -169,7 +169,6 @@ def Game(window,models):
     floor = [SquareBlock(64*i, height-64,64) for i in range(25)]
     
     player_array = np.array([models, players])
-    winning_players = []
     screen_offset = 0
     time_limit = 150
     time = 0
@@ -185,10 +184,9 @@ def Game(window,models):
         
         window.fill(backround_color)
         
-        to_delete = []
         for i in range(len(player_array[0,:])):
         
-            keys = player_array[0,i].predict([[player_array[1,i].rect.x,player_array[1,i].rect.y,player_array[1,i].v_x,player_array[1,i].v_y,int(player_array[1,i].canjump),player_array[1,i].flag_x,player_array[1,i].flag_y]])
+            keys = player_array[0,i].predict([[player_array[1,i].rect.x,player_array[1,i].rect.y,player_array[1,i].v_x,player_array[1,i].v_y,int(player_array[1,i].canjump),player_array[1,i].flag_x,player_array[1,i].flag_y]],verbose = 0)
         
             if keys[0,2]>.5 and player_array[1,i].canjump:
                 player_array[1,i].jump()
@@ -200,12 +198,9 @@ def Game(window,models):
             player_array[1,i].draw(window, screen_offset)
             player_array[1,i].time += 1
             if player_array[1,i].win:
-                to_delete.append(i)
+                player_array[1,i].time -= 1
         
-        for i in to_delete:
-            winning_players.append(player_array[1,i])
-    
-        player_array = np.delete(player_array,to_delete,1)
+       
 
 
 
@@ -213,12 +208,13 @@ def Game(window,models):
             object.draw(window, screen_offset)
         pygame.display.update()
 
-        camera_tracked = player_array[1,np.argmax([player.rect.right for player in player_array[1,:]])]
+        if player_array[0].size:
+            camera_tracked = player_array[1,np.argmax([player.rect.right for player in player_array[1,:]])]
 
-        if (camera_tracked.rect.right - screen_offset) > width - 150 and camera_tracked.v_x > 0:
-            screen_offset += camera_tracked.v_x
-        if (camera_tracked.rect.left - screen_offset) < 150 and camera_tracked.v_x < 0:
-            screen_offset += camera_tracked.v_x
+            if (camera_tracked.rect.right - screen_offset) > width - 150 and camera_tracked.v_x > 0:
+                screen_offset += camera_tracked.v_x
+            if (camera_tracked.rect.left - screen_offset) < 150 and camera_tracked.v_x < 0:
+                screen_offset += camera_tracked.v_x
         
         for i in range(len(player_array[1,:])):
 
@@ -228,9 +224,8 @@ def Game(window,models):
         if time > time_limit:
             run = False
 
-        
-    player_array = list(player_array[1,:]) + winning_players 
-    return [[player.win,player.rect.x,time,player.died] for player in player_array]
+    data_array = list(player_array[1,:])
+    return [[player.win,player.rect.x,time,player.died] for player in data_array]
     pygame.quit()
     quit()           
     
