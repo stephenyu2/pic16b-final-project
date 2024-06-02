@@ -126,11 +126,11 @@ generations = 10
 best_of_gen = []
 parents = []
 for i in range(generations):
-    fitness = Game_model_version.Game(window,models+parents)
+    fitness = Game_model_version.Game(window,models)
     parent_ids = score(fitness)
     parents = [models[parent_ids[0]],models[parent_ids[1]]]
     best_of_gen.append(models[parent_ids[0]])
     children = propagate(models[parent_ids[0]], models[parent_ids[1]], 10)
-    models = mutate(children)
+    models = mutate(children)+parents
 
 
