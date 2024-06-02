@@ -61,7 +61,7 @@ def mutate(models):
          for i in range(4):
               for weight in weights[i]:
                    if random.choice([0,1]):
-                        weight += random.normalvariate(0,.01)
+                        weight += random.normalvariate(0,.05)
          model.layers[0].set_weights(weights[0:2])
          model.layers[1].set_weights(weights[2:4])
          mutated.append(model)
@@ -129,6 +129,6 @@ for i in range(generations):
     print(fitness)
     parent_ids = score(fitness)
     best_of_gen.append(models[parent_ids[0]])
-    children = propagate(models[parent_ids[0]], models[parent_ids[0]], 10)
+    children = propagate(models[parent_ids[0]], models[parent_ids[1]], 10)
     models = mutate(children)
 
