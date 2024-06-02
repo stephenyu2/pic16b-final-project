@@ -203,8 +203,9 @@ def Game(window,models):
                 to_delete.append(i)
         
         for i in to_delete:
-            winning_players.append(player_array[:,i])
-            player_array = np.delete(player_array,i,1)
+            winning_players.append(player_array[1,i])
+    
+        player_array = np.delete(player_array,to_delete,1)
 
 
 
@@ -228,8 +229,8 @@ def Game(window,models):
             run = False
 
         
-    player_array = np.concatenate((player_array,np.array(winning_players).T),axis = 1)
-    return [[player.win,player.rect.x,time,player.died] for player in player_array[1,:]]
+    player_array = list(player_array[1,:]) + winning_players 
+    return [[player.win,player.rect.x,time,player.died] for player in player_array]
     pygame.quit()
     quit()           
     
