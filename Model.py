@@ -6,14 +6,14 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import pygame
 pygame.init()
+import random
 
 import Game_model_version
 
 width = 600
 height = 600
 window = pygame.display.set_mode((width,height))
-
-
+ 
 def make_model(initializer):
     FNNmodel = keras.Sequential(
         [
@@ -27,18 +27,68 @@ def make_model(initializer):
 
 initializer = tf.keras.initializers.HeNormal(seed = 1)
 fitness = []
+models = []
 best_models = []
 
 for i in range(10):
         model = make_model(initializer)
-        print(model.predict(np.array([[1,1,1,1,1,1,1]])))
-        fitness.append(Game_model_version.Game(window,model))
-       
-        if fitness[i][0] == True:
-            best_models.append(fitness[i]) 
+        models.append(model)
 
+
+#fitness = Game_model_version.Game(window,models)
 print(fitness)
 print("")  
+
+def score(fitness_values):
+    """
+    takes in a list of fitness values, returns the indeces of the two best models
+    """
+
+    scores = []
+    for model_data in fitness_values:
+        scores.append(1000*int(model_data[0]) + model_data[1] - model_data[2] - 500*(int(model_data[3])))
+    idx1 = np.argmax(scores)
+    scores = np.delete(scores,idx1)
+    idx2 = np.argmax(scores)
+
+    return [idx1,idx2]
+
+
+def mutate(models):
+    mutated = []
+    for model in models:
+         weights = model.get_weights()
+         for i in range(4):
+              for weight in weights[i]:
+                   if random.choice([0,1]):
+                        weight += random.normalvariate(0,.05)
+         model.layers[0].set_weights(weights[0:2])
+         model.layers[1].set_weights(weights[2:4])
+         mutated.append(model)
+    return mutated
+        
+
+def propagate(model1,model2,no_of_children):
+    weights = model1.get_weights()+model2.get_weights()
+
+    children = []
+    for i in range(no_of_children):
+         model = make_model(initializer)
+
+         L1 = []
+         L1.append(weights[random.choice([0,4])])
+         L1.append(weights[random.choice([0,4])+1])
+         model.layers[0].set_weights(L1)
+    
+         L2 = []
+         L2.append(weights[random.choice([2,6])])
+         L2.append(weights[random.choice([2,6])+1])
+         model.layers[1].set_weights(L2)
+         children.append(model)
+
+    return children
+
+
 
 while len(best_models) > 2: # if more than 2 models find a solution, find the best 2
     max_val, ind = -1,0     
