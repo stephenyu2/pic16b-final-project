@@ -120,3 +120,15 @@ if len(best_models) < 2:  # other cases: 0 models solve, 1 model solves (find tw
     best_models.append(fitness[i])
         
 print(best_models) 
+
+#GENERATION LOOP:
+generations = 10
+best_of_gen = []
+for i in range(generations):
+    fitness = Game_model_version.Game(window,models)
+    print(fitness)
+    parent_ids = score(fitness)
+    best_of_gen.append(models[parent_ids[0]])
+    children = propagate(models[parent_ids[0]], models[parent_ids[0]], 10)
+    models = mutate(children)
+
