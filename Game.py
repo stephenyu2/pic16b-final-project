@@ -1,4 +1,5 @@
 import pygame
+import math
 pygame.init()
 
 backround_color = (135, 206, 235)
@@ -54,9 +55,11 @@ class Player(pygame.sprite.Sprite):
         self.fall_count = 0
         self.win = False
         self.sprites = sprites
+        self.sightlines = []
+        self.distances = []
 
     def jump(self):
-        self.v_y = -7
+        self.v_y = -6.6
         self.animation_frame = 0
 
     def adjust_position(self,v_y,v_x):
@@ -81,7 +84,7 @@ class Player(pygame.sprite.Sprite):
         self.animation_frame += 1
         self.rect = self.sprite.get_rect(topleft = (self.rect.x,self.rect.y))
     
-    def check_collision(self,objects):
+    def check_collision(self,objects, offset):
         keys = pygame.key.get_pressed()
         self.v_x = 0
 
@@ -115,6 +118,8 @@ class Player(pygame.sprite.Sprite):
                 self.direction = "right"
                 self.animation_frame = 0
 
+        self.distances = [100,100,100,100,100,100,100,100]
+        self.sightlines = [[(self.rect.x+23,self.rect.y+23),(self.rect.x+23+math.sin(.25*i*math.pi)*100,self.rect.y+23+math.cos(.25*i*math.pi)*100),3] for i in range(8)]
         for object in objects:
             if pygame.Rect.colliderect(self.rect,object.rect):
                 if self.v_y > 0:
@@ -125,10 +130,27 @@ class Player(pygame.sprite.Sprite):
                 if self.v_y < 0:
                     self.rect.top = object.rect.bottom
                     self.v_y = 0
+            for i in range(8):
+                x = object.rect.clipline(self.sightlines[i][0][0],self.sightlines[i][0][1],self.sightlines[i][1][0],self.sightlines[i][1][1])
+                if x != ():
+                    start = x[0]
+                    d = math.sqrt((start[0] - self.rect.x-23)**2+(start[1] - self.rect.y-23)**2)
+                else: d = 100
+                if d < self.distances[i]:
+                    self.distances[i] = d
     
 
     def draw(self, window, screen_offset):
         window.blit(self.sprite, (self.rect.x - screen_offset,self.rect.y))
+        for i in range(8):
+            if self.distances[i] < 100:
+                x = 255
+                y = 0
+            else: 
+                x = 0
+                y = 255
+            pygame.draw.line(window,(x,y,0),tuple(map(lambda i, j: i + j, self.sightlines[i][0], (-screen_offset,0))),tuple(map(lambda i, j: i + j, self.sightlines[i][1], (-screen_offset,0))),self.sightlines[i][2])
+
 
 class Spikes(Object): 
 
@@ -228,7 +250,7 @@ def Game(window, level = 1):
         
 
         player.next_frame(fps)
-        player.check_collision(floor+obstacles)
+        player.check_collision(floor+obstacles, screen_offset)
 
         window.fill(backround_color)
         player.draw(window, screen_offset)
@@ -246,4 +268,4 @@ def Game(window, level = 1):
     pygame.quit()
     quit()           
             
-Game(window, level = 5)
+Game(window, level = 4)
