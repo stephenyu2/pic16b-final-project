@@ -71,8 +71,8 @@ class Player(pygame.sprite.Sprite):
         self.died = False
         self.time = 0
         self.sightlines = []
-        self.distances = []
-        self.types = []
+        self.distances = [100,100,100,100,100,100,100,100]
+        self.types = [0,0,0,0,0,0,0,0]
         self.name_mapping = {"block": 0, "spike": 1, "flag": 2}
 
     def jump(self):
@@ -267,9 +267,14 @@ def Game(window,models,level = 1):
         
         window.fill(backround_color)
         
+        stop = True
         for i in range(len(player_array[0,:])):
         
-            keys = player_array[0,i].predict([[player_array[1,i].rect.x,player_array[1,i].rect.y,player_array[1,i].v_x,player_array[1,i].v_y,int(player_array[1,i].canjump),player_array[1,i].flag_x,player_array[1,i].flag_y]],verbose = 0)
+            keys = player_array[0,i].predict([[player_array[1,i].rect.x,player_array[1,i].rect.y,
+                                               player_array[1,i].v_x,player_array[1,i].v_y,
+                                               int(player_array[1,i].canjump),player_array[1,i].flag_x,
+                                               player_array[1,i].flag_y] + player_array[1,i].distances 
+                                                + player_array[1,i].types],verbose = 0)
         
             if keys[0,2]>.5 and player_array[1,i].canjump:
                 player_array[1,i].jump()
@@ -280,11 +285,15 @@ def Game(window,models,level = 1):
 
             if not player_array[1,i].died:
                 player_array[1,i].draw(window, screen_offset)
+                stop = False
             player_array[1,i].time += 1
             if player_array[1,i].win:
                 player_array[1,i].time -= 1
+            
         
-       
+        if stop == True:
+            time += time_limit
+
 
 
 
