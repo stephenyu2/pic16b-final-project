@@ -278,4 +278,4 @@ def Game(window, level = 1):
     pygame.quit()
     quit()           
             
-Game(window, level = 4)
+Game(window, level = 2)

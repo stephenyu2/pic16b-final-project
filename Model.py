@@ -12,7 +12,7 @@ import Game_model_version
 
 width = 600
 height = 600
-model_type = 0 ### SEE DISCLAIMER BELOW
+model_type = 1 ### SEE DISCLAIMER BELOW
 
 """
 VERY IMPORTANT: 
@@ -107,9 +107,6 @@ def propagate(model1, model2, no_of_children, initializer, model_type):
         children.append(model)
     
     return children
-
-def predict(model, input_data):
-    return model.predict(input_data)
 
 generations = 100
 best_of_gen = []
