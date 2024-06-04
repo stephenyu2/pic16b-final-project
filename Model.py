@@ -12,16 +12,37 @@ import Game_model_version
 
 width = 600
 height = 600
+model_type = 0 ### SEE DISCLAIMER BELOW
+
+"""
+VERY IMPORTANT: 
+
+model_type is a variable that you can change to different integers to change the model 
+
+Below is the legend: 
+0: Inputs: Maximum (23) Layers: (23, 10, 3) with 23 being the input layer and 3 being the output layer
+1: Inputs: Maximum (23) Layers: (23, 5, 5, 3) with 23 being the input layer and 3 being the output layer
+"""
 window = pygame.display.set_mode((width,height))
 
 
-def make_model(initializer):
-    FNNmodel = keras.Sequential(
-        [
-            keras.Input(shape = 23),
-            layers.Dense(10, activation = "relu", name = "layer1", kernel_initializer = initializer),
-            layers.Dense(3, name = "output")
-        ])
+def make_model(initializer, model_type):
+    
+    if model_type == 0: 
+        FNNmodel = keras.Sequential(
+            [
+                keras.Input(shape = (23,)),
+                layers.Dense(10, activation = "relu", name = "layer1", kernel_initializer = initializer),
+                layers.Dense(3, name = "output")
+            ])
+    elif model_type == 1: 
+        FNNmodel = keras.Sequential(
+            [
+                keras.Input(shape = (23,)),
+                layers.Dense(5, activation = "relu", name = "layer1", kernel_initializer = initializer),
+                layers.Dense(5, activation = "relu", name = "layer2", kernel_initializer = initializer),
+                layers.Dense(3, name = "output")
+            ])
 
     return FNNmodel
 
@@ -32,7 +53,7 @@ models = []
 best_models = []
 
 for i in range(10):
-        model = make_model(initializer)
+        model = make_model(initializer, model_type = model_type)
         models.append(model)
 
 
@@ -60,36 +81,35 @@ def score(fitness_values):
 def mutate(models):
     mutated = []
     for model in models:
-         weights = model.get_weights()
-         for i in range(4):
-              for weight in weights[i]:
-                   if random.choice([0,1]):
-                        weight += random.normalvariate(0,.2)
-         model.layers[0].set_weights(weights[0:2])
-         model.layers[1].set_weights(weights[2:4])
-         mutated.append(model)
+        weights = model.get_weights()
+        for i in range(len(weights)):
+            for weight in weights[i]:
+                if random.choice([0, 1]):
+                    weight += random.normalvariate(0, .2)
+        model.set_weights(weights)
+        mutated.append(model)
     return mutated
         
 
-def propagate(model1,model2,no_of_children):
-    weights = model1.get_weights()+model2.get_weights()
-
+def propagate(model1, model2, no_of_children, initializer, model_type):
+    weights1 = model1.get_weights()
+    weights2 = model2.get_weights()
+    
     children = []
     for i in range(no_of_children):
-         model = make_model(initializer)
-
-         L1 = []
-         L1.append(weights[random.choice([0,4])])
-         L1.append(weights[random.choice([0,4])+1])
-         model.layers[0].set_weights(L1)
+        model = make_model(initializer, model_type=model_type)
+        
+        new_weights = []
+        for j in range(len(weights1)):
+            new_weights.append(random.choice([weights1[j], weights2[j]]))
+        
+        model.set_weights(new_weights)
+        children.append(model)
     
-         L2 = []
-         L2.append(weights[random.choice([2,6])])
-         L2.append(weights[random.choice([2,6])+1])
-         model.layers[1].set_weights(L2)
-         children.append(model)
-
     return children
+
+def predict(model, input_data):
+    return model.predict(input_data)
 
 generations = 100
 best_of_gen = []
@@ -99,7 +119,7 @@ for i in range(generations):
     parent_ids = score(fitness)
     parents = [models[parent_ids[0]],models[parent_ids[1]]]
     best_of_gen.append(models[parent_ids[0]])
-    children = propagate(models[parent_ids[0]], models[parent_ids[1]], 10)
+    children = propagate(models[parent_ids[0]], models[parent_ids[1]], 10, initializer, model_type)
     models = mutate(children)+parents
 
 

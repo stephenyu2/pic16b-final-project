@@ -270,11 +270,12 @@ def Game(window,models,level = 1):
         stop = True
         for i in range(len(player_array[0,:])):
         
-            keys = player_array[0,i].predict([[player_array[1,i].rect.x,player_array[1,i].rect.y,
-                                               player_array[1,i].v_x,player_array[1,i].v_y,
-                                               int(player_array[1,i].canjump),player_array[1,i].flag_x,
-                                               player_array[1,i].flag_y] + player_array[1,i].distances 
-                                                + player_array[1,i].types],verbose = 0)
+            input_data = np.array([[player_array[1, i].rect.x, player_array[1, i].rect.y,
+                                    player_array[1, i].v_x, player_array[1, i].v_y,
+                                    int(player_array[1, i].canjump), player_array[1, i].flag_x,
+                                    player_array[1, i].flag_y] + player_array[1, i].distances
+                                   + player_array[1, i].types])
+            keys = player_array[0, i].predict(input_data, verbose=0)
         
             if keys[0,2]>.5 and player_array[1,i].canjump:
                 player_array[1,i].jump()
