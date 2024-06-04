@@ -5,6 +5,7 @@ pygame.init()
 backround_color = (135, 206, 235)
 fps = 1000
 velocity = 4
+floor_height = 160
 width = 600
 height = 600
 
@@ -30,6 +31,16 @@ class SquareBlock(Object):
         block = pygame.transform.scale_by(surface,2)
         self.image.blit(block, (0,0))
         
+class Spikes(Object): 
+
+    def __init__(self,x,y,width,height):
+        super().__init__(x,y,width,height,"spike")
+        image = pygame.image.load("spikes.png").convert_alpha()
+        rect = pygame.Rect(58,222,width,height)
+        surface = pygame.Surface((width,height),pygame.SRCALPHA,32)
+        surface.blit(image,(0,0), rect)
+        block = pygame.transform.scale(surface, (64, 32)) 
+        self.image.blit(block, (0,0))
 
 class Flag(Object):
     def __init__(self,x,y,width, height):
@@ -47,7 +58,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = pygame.Rect(x,y,width,height)
         self.v_x = 0
         self.v_y = 0
-        self.canjump = True
+        self.canjump = False
         self.direction = "right"
         self.animation_frame= 0
         self.fall_count = 0
@@ -59,7 +70,7 @@ class Player(pygame.sprite.Sprite):
         self.time = 0
 
     def jump(self):
-        self.v_y = -7
+        self.v_y = -6.6
         self.animation_frame = 0
 
     def adjust_position(self,v_y,v_x):
@@ -92,16 +103,20 @@ class Player(pygame.sprite.Sprite):
         for object in objects:
             if pygame.Rect.colliderect(self.rect.move(0,1), object.rect) and pygame.Rect.colliderect(self.rect.move(0,-1), object.rect):
                 wall_left = True
-                if object.name == "flag":
+                if object.name == "spike":
+                        self.died = True
+                elif object.name == "flag":
                         self.win = True
                 break
         self.adjust_position(0,8)
 
         wall_right = False
         for object in objects:
-            if pygame.Rect.colliderect(self.rect.move(0,1), object.rect) and pygame.Rect.colliderect(self.rect.move(0,-1), object.rect):
+            if pygame.Rect.colliderect(self.rect.move(0,1), object.rect) and pygame.Rect.colliderect(self.rect.move(0,-2), object.rect):
                 wall_right = True
-                if object.name == "flag":
+                if object.name == "spike":
+                        self.died = True
+                elif object.name == "flag":
                         self.win = True
                 break
         self.adjust_position(0,-4)
@@ -132,7 +147,7 @@ class Player(pygame.sprite.Sprite):
     def draw(self, window, screen_offset):
         window.blit(self.sprite, (self.rect.x - screen_offset,self.rect.y))
 
-def Game(window,models):
+def Game(window,models,level = 1):
     pygame.display.set_caption("1 million Kirby's fail at walking")
     clock = pygame.time.Clock()
     kirbypng = pygame.image.load("kirby.png").convert_alpha()
@@ -165,8 +180,42 @@ def Game(window,models):
         animation_dict[name+"left"] = [pygame.transform.flip(sprite,True,False) for sprite in animation_dict[name]]
 
     players = [Player(64,256,64,64,animation_dict,512,height-64-128) for i in range(len(models))]
-    obstacles = [SquareBlock(384,height-128, 64), Flag(512,height-64-128,64,128)]
-    floor = [SquareBlock(64*i, height-64,64) for i in range(25)]
+
+    if level == 1: 
+        obstacles = [SquareBlock(384,height-floor_height-64, 64), 
+                     Flag(512,height-64-floor_height-64,64,128)]
+        floor = [SquareBlock(64*i, height-floor_height,64) for i in range(10)]
+    elif level == 2: 
+        obstacles = [SquareBlock(256,height-floor_height-64, 64), 
+                     SquareBlock(256+64,height-floor_height-64-64, 64), 
+                     SquareBlock(256+64+64,height-floor_height-64-64, 64), 
+                     Flag(256+64+64,height-64-floor_height-64-64-64,64,128)]
+        floor = [SquareBlock(64*i, height-floor_height,64) for i in range(10)]
+    elif level == 3: 
+        obstacles = [SquareBlock(256+64,height-floor_height-64, 64), 
+                     SquareBlock(256,height-floor_height+64, 64), 
+                     Spikes(256,height-floor_height+32, 150, 50), 
+                     Flag(256+(64*4),height-floor_height-64-64,64,128)]
+        floor = [SquareBlock(64*i, height-floor_height,64) for i in range(10) if i != 4]
+    elif level == 4: 
+        spikes = [Spikes(256 + (64 * i), height-floor_height-32, 150, 50) for i in range(6)]
+        obstacles = [SquareBlock(256 + 64,height-floor_height-64-64, 64), 
+                     SquareBlock(256 - 64,height-floor_height-64, 64), 
+                     SquareBlock(256 + (64 * 4),height-floor_height-(64 * 3), 64), 
+                     Flag(256 + (64 * 8),height-64-floor_height-64,64,128)]
+        obstacles = obstacles + spikes
+        floor = [SquareBlock(64*i, height-floor_height,64) for i in range(15)]
+    elif level == 5: 
+        spikes = [Spikes(256 + (64 * i), height-floor_height-32, 150, 50) for i in range(6)]
+        obstacles = [SquareBlock(256 + 64,height-floor_height-64-64, 64), 
+                     SquareBlock(256 - 64,height-floor_height-64, 64), 
+                     SquareBlock(256 + (64 * 4),height-floor_height-(64 * 3), 64), 
+                     SquareBlock(256 + (64 * 5),height-floor_height-(64 * 4), 64), 
+                     SquareBlock(256 + (64 * 3),height-floor_height-(64 * 5), 64), 
+                     SquareBlock(256 + (64 * 2),height-floor_height-(64 * 5), 64), 
+                     Flag(256 + (64 * 2),height-floor_height-(64 * 7),64,128)]
+        obstacles = obstacles + spikes
+        floor = [SquareBlock(64*i, height-floor_height,64) for i in range(10)]
     
     player_array = np.array([models, players])
     screen_offset = 0
@@ -195,7 +244,8 @@ def Game(window,models):
             player_array[1,i].next_frame(fps)
             player_array[1,i].check_collision(floor+obstacles,keys)
 
-            player_array[1,i].draw(window, screen_offset)
+            if not player_array[1,i].died:
+                player_array[1,i].draw(window, screen_offset)
             player_array[1,i].time += 1
             if player_array[1,i].win:
                 player_array[1,i].time -= 1

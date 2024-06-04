@@ -5,15 +5,16 @@ import numpy as np
 from matplotlib import pyplot as plt
 import pandas as pd
 import pygame
-pygame.init()
 import random
+pygame.init()
 
 import Game_model_version
 
 width = 600
 height = 600
 window = pygame.display.set_mode((width,height))
- 
+
+
 def make_model(initializer):
     FNNmodel = keras.Sequential(
         [
@@ -35,10 +36,6 @@ for i in range(10):
         models.append(model)
 
 
-#fitness = Game_model_version.Game(window,models)
-print(fitness)
-print("")  
-
 def score(fitness_values):
     """
     takes in a list of fitness values, returns the indeces of the two best models
@@ -46,10 +43,18 @@ def score(fitness_values):
 
     scores = []
     for model_data in fitness_values:
-        scores.append(1000*int(model_data[0]) + model_data[1] - model_data[2] - 500*(int(model_data[3])))
+        scores.append(1000*model_data[0] + model_data[1] - model_data[2] - 500*model_data[3])
+    
+    print(fitness_values)
+    print(scores)
+
     idx1 = np.argmax(scores)
+    print(idx1)
     scores = np.delete(scores,idx1)
     idx2 = np.argmax(scores)
+    if idx2 >= idx1:
+         idx2 += 1
+    print(idx2)
 
     return [idx1,idx2]
 
@@ -88,49 +93,14 @@ def propagate(model1,model2,no_of_children):
 
     return children
 
-
-
-while len(best_models) > 2: # if more than 2 models find a solution, find the best 2
-    max_val, ind = -1,0     
-        
-    for i in range(len(best_models)):
-        if best_models[i][2] > max_val:
-            max_val, ind = best_models[i][2], i
-    
-    del best_models[ind]
-    
-
-if len(best_models) < 2:  # other cases: 0 models solve, 1 model solves (find two models where kirby survives longest)
-    if len(best_models) == 0:
-        max_val, ind = -1,0
-        
-        for i in len(fitness):
-            if fitness[i][2] > max_val:
-                max_val, ind = fitness[i][2], i
-                
-        best_models.append(fitness[i])
-        del fitness[i]
-        
-    max_val, ind = -1,0
-        
-    for i in len(fitness):
-        if fitness[i][2] > max_val:
-             max_val, ind = fitness[i][2], i
-                
-    best_models.append(fitness[i])
-        
-print(best_models) 
-
-#GENERATION LOOP:
-generations = 10
+generations = 2
 best_of_gen = []
 parents = []
 for i in range(generations):
-    fitness = Game_model_version.Game(window,models)
+    fitness = Game_model_version.Game(window,models, level = 4)
     parent_ids = score(fitness)
     parents = [models[parent_ids[0]],models[parent_ids[1]]]
     best_of_gen.append(models[parent_ids[0]])
     children = propagate(models[parent_ids[0]], models[parent_ids[1]], 10)
     models = mutate(children)+parents
-
 
