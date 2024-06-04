@@ -18,7 +18,7 @@ window = pygame.display.set_mode((width,height))
 def make_model(initializer):
     FNNmodel = keras.Sequential(
         [
-            keras.Input(shape = 7),
+            keras.Input(shape = 23),
             layers.Dense(10, activation = "relu", name = "layer1", kernel_initializer = initializer),
             layers.Dense(3, name = "output")
         ])
@@ -54,8 +54,6 @@ def score(fitness_values):
     idx2 = np.argmax(scores)
     if idx2 >= idx1:
          idx2 += 1
-    print(idx2)
-
     return [idx1,idx2]
 
 
@@ -93,14 +91,15 @@ def propagate(model1,model2,no_of_children):
 
     return children
 
-generations = 2
+generations = 100
 best_of_gen = []
 parents = []
 for i in range(generations):
-    fitness = Game_model_version.Game(window,models, level = 4)
+    fitness = Game_model_version.Game(window,models, level = 5)
     parent_ids = score(fitness)
     parents = [models[parent_ids[0]],models[parent_ids[1]]]
     best_of_gen.append(models[parent_ids[0]])
     children = propagate(models[parent_ids[0]], models[parent_ids[1]], 10)
     models = mutate(children)+parents
+
 
