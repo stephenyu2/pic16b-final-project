@@ -11,7 +11,7 @@ width = 600
 height = 600
 
 class Object(pygame.sprite.Sprite):
-    def __init__(self, x,y,width,height, name = None):
+    def __init__(self, x,y,width,height, name = "block"):
         super().__init__()
         self.rect = pygame.Rect(x,y,width,height)
         self.image = pygame.Surface((width,height),pygame.SRCALPHA)
@@ -35,7 +35,7 @@ class SquareBlock(Object):
 class Spikes(Object): 
 
     def __init__(self,x,y,width,height):
-        super().__init__(x,y,width,height)
+        super().__init__(x,y,width,height,"spike")
         image = pygame.image.load("spike-sprite.png").convert_alpha()
         rect = pygame.Rect(52,72,width*2,height*2)
         surface = pygame.Surface((width*2,height*2),pygame.SRCALPHA,32)
@@ -72,6 +72,8 @@ class Player(pygame.sprite.Sprite):
         self.time = 0
         self.sightlines = []
         self.distances = []
+        self.types = []
+        self.name_mapping = {"block": 0, "spike": 1, "flag": 2}
 
     def jump(self):
         self.v_y = -6.6
@@ -138,6 +140,7 @@ class Player(pygame.sprite.Sprite):
                 self.direction = "right"
                 self.animation_frame = 0
         self.distances = [100,100,100,100,100,100,100,100]
+        self.types = [0,0,0,0,0,0,0,0]
         self.sightlines = [[(self.rect.x+23,self.rect.y+23),(self.rect.x+23+math.sin(.25*i*math.pi)*100,self.rect.y+23+math.cos(.25*i*math.pi)*100),3] for i in range(8)]
         for object in objects:
             if pygame.Rect.colliderect(self.rect,object.rect):
@@ -157,18 +160,25 @@ class Player(pygame.sprite.Sprite):
                 else: d = 100
                 if d < self.distances[i]:
                     self.distances[i] = d
+                    self.types[i] = self.name_mapping[object.name]
     
 
     def draw(self, window, screen_offset):
         window.blit(self.sprite, (self.rect.x - screen_offset,self.rect.y))
         for i in range(8):
-            if self.distances[i] < 100:
+            if self.distances[i] < 100 and self.types[i] == 0:
+                x = 0
+                y = 0
+                z = 255
+            elif self.distances[i] < 100: 
                 x = 255
                 y = 0
-            else: 
+                z = 0
+            else:
                 x = 0
                 y = 255
-            pygame.draw.line(window,(x,y,0),tuple(map(lambda i, j: i + j, self.sightlines[i][0], (-screen_offset,0))),tuple(map(lambda i, j: i + j, self.sightlines[i][1], (-screen_offset,0))),self.sightlines[i][2])
+                z = 0
+            pygame.draw.line(window,(x,y,z),tuple(map(lambda i, j: i + j, self.sightlines[i][0], (-screen_offset,0))),tuple(map(lambda i, j: i + j, self.sightlines[i][1], (-screen_offset,0))),self.sightlines[i][2])
 
 def Game(window,models,level = 1):
     pygame.display.set_caption("1 million Kirby's fail at walking")

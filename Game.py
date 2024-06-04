@@ -11,7 +11,7 @@ velocity = 4
 window = pygame.display.set_mode((width,height))
 
 class Object(pygame.sprite.Sprite):
-    def __init__(self, x,y,width,height, name = None):
+    def __init__(self, x,y,width,height, name = "block"):
         super().__init__()
         self.rect = pygame.Rect(x,y,width,height)
         self.image = pygame.Surface((width,height),pygame.SRCALPHA)
@@ -22,27 +22,7 @@ class Object(pygame.sprite.Sprite):
     def draw(self, window, screen_offset):
         window.blit(self.image,(self.rect.x - screen_offset, self.rect.y))
 
-class SquareBlock(Object):
-    def __init__(self,x,y,width):
-        super().__init__(x,y,width,width)
-        image = pygame.image.load("Terrain.png").convert_alpha()
-        rect = pygame.Rect(208,144,width,width)
-        surface = pygame.Surface((width,width),pygame.SRCALPHA,32)
-        surface.blit(image,(0,0),rect)
-        block = pygame.transform.scale_by(surface,2)
-        self.image.blit(block, (0,0))
         
-
-class Flag(Object):
-    def __init__(self,x,y,width, height):
-        super().__init__(x,y,width,height,"flag")
-        image = pygame.image.load("flagpole.png").convert_alpha()
-        rect = pygame.Rect(420,0,width*12,height*28)
-        surface = pygame.Surface((width*12,height*28),pygame.SRCALPHA,32)
-        surface.blit(image,(0,0),rect)
-        flag = pygame.transform.scale(surface,(128,386))
-        self.image.blit(flag, (0,0))
-
 class Player(pygame.sprite.Sprite):
 
     def __init__(self, x , y, width, height, sprites):
@@ -57,6 +37,8 @@ class Player(pygame.sprite.Sprite):
         self.sprites = sprites
         self.sightlines = []
         self.distances = []
+        self.types = []
+        self.name_mapping = {"block": 0, "spike": 1, "flag": 2}
 
     def jump(self):
         self.v_y = -6.6
@@ -84,7 +66,7 @@ class Player(pygame.sprite.Sprite):
         self.animation_frame += 1
         self.rect = self.sprite.get_rect(topleft = (self.rect.x,self.rect.y))
     
-    def check_collision(self,objects, offset):
+    def check_collision(self,objects):
         keys = pygame.key.get_pressed()
         self.v_x = 0
 
@@ -119,6 +101,7 @@ class Player(pygame.sprite.Sprite):
                 self.animation_frame = 0
 
         self.distances = [100,100,100,100,100,100,100,100]
+        self.types = [0,0,0,0,0,0,0,0]
         self.sightlines = [[(self.rect.x+23,self.rect.y+23),(self.rect.x+23+math.sin(.25*i*math.pi)*100,self.rect.y+23+math.cos(.25*i*math.pi)*100),3] for i in range(8)]
         for object in objects:
             if pygame.Rect.colliderect(self.rect,object.rect):
@@ -138,30 +121,57 @@ class Player(pygame.sprite.Sprite):
                 else: d = 100
                 if d < self.distances[i]:
                     self.distances[i] = d
+                    self.types[i] = self.name_mapping[object.name]
     
 
     def draw(self, window, screen_offset):
         window.blit(self.sprite, (self.rect.x - screen_offset,self.rect.y))
         for i in range(8):
-            if self.distances[i] < 100:
+            if self.distances[i] < 100 and self.types[i] == 0:
+                x = 0
+                y = 0
+                z = 255
+            elif self.distances[i] < 100: 
                 x = 255
                 y = 0
-            else: 
+                z = 0
+            else:
                 x = 0
                 y = 255
-            pygame.draw.line(window,(x,y,0),tuple(map(lambda i, j: i + j, self.sightlines[i][0], (-screen_offset,0))),tuple(map(lambda i, j: i + j, self.sightlines[i][1], (-screen_offset,0))),self.sightlines[i][2])
+                z = 0
+            pygame.draw.line(window,(x,y,z),tuple(map(lambda i, j: i + j, self.sightlines[i][0], (-screen_offset,0))),tuple(map(lambda i, j: i + j, self.sightlines[i][1], (-screen_offset,0))),self.sightlines[i][2])
 
+class SquareBlock(Object):
+    def __init__(self,x,y,width):
+        super().__init__(x,y,width,width)
+        image = pygame.image.load("Terrain.png").convert_alpha()
+        rect = pygame.Rect(208,144,width,width)
+        surface = pygame.Surface((width,width),pygame.SRCALPHA,32)
+        surface.blit(image,(0,0),rect)
+        block = pygame.transform.scale_by(surface,2)
+        self.image.blit(block, (0,0))
 
 class Spikes(Object): 
 
     def __init__(self,x,y,width,height):
-        super().__init__(x,y,width,height)
-        image = pygame.image.load("spikes.png").convert_alpha()
-        rect = pygame.Rect(58,222,width,height)
-        surface = pygame.Surface((width,height),pygame.SRCALPHA,32)
+        super().__init__(x,y,width,height, "spike")
+        image = pygame.image.load("spike-sprite.png").convert_alpha()
+        rect = pygame.Rect(56,72,width*2,height*2)
+        surface = pygame.Surface((width*2,height*2),pygame.SRCALPHA,32)
         surface.blit(image,(0,0), rect)
-        block = pygame.transform.scale(surface, (64, 32)) 
+        block = pygame.transform.scale_by(surface, .5) 
         self.image.blit(block, (0,0))
+
+class Flag(Object):
+    def __init__(self,x,y,width, height):
+        super().__init__(x,y,width,height,"flag")
+        image = pygame.image.load("flagpole.png").convert_alpha()
+        rect = pygame.Rect(420,0,width*12,height*28)
+        surface = pygame.Surface((width*12,height*28),pygame.SRCALPHA,32)
+        surface.blit(image,(0,0),rect)
+        flag = pygame.transform.scale(surface,(128,386))
+        self.image.blit(flag, (0,0))
+
 
 def Game(window, level = 1):
     pygame.display.set_caption("1 million Kirby's fail at walking")
@@ -209,11 +219,11 @@ def Game(window, level = 1):
     elif level == 3: 
         obstacles = [SquareBlock(256+64,height-floor_height-64, 64), 
                      SquareBlock(256,height-floor_height+64, 64), 
-                     Spikes(256,height-floor_height+32, 150, 50), 
+                     Spikes(256,height-floor_height+32, 32, 32), 
                      Flag(256+(64*4),height-floor_height-64-64,64,128)]
         floor = [SquareBlock(64*i, height-floor_height,64) for i in range(10) if i != 4]
     elif level == 4: 
-        spikes = [Spikes(256 + (64 * i), height-floor_height-32, 150, 50) for i in range(6)]
+        spikes = [Spikes(256 + (32 * i), height-floor_height-32, 32, 32) for i in range(12)]
         obstacles = [SquareBlock(256 + 64,height-floor_height-64-64, 64), 
                      SquareBlock(256 - 64,height-floor_height-64, 64), 
                      SquareBlock(256 + (64 * 4),height-floor_height-(64 * 3), 64), 
@@ -221,7 +231,7 @@ def Game(window, level = 1):
         obstacles = obstacles + spikes
         floor = [SquareBlock(64*i, height-floor_height,64) for i in range(15)]
     elif level == 5: 
-        spikes = [Spikes(256 + (64 * i), height-floor_height-32, 150, 50) for i in range(6)]
+        spikes = [Spikes(256 + (64 * i), height-floor_height-32, 64, 64) for i in range(6)]
         obstacles = [SquareBlock(256 + 64,height-floor_height-64-64, 64), 
                      SquareBlock(256 - 64,height-floor_height-64, 64), 
                      SquareBlock(256 + (64 * 4),height-floor_height-(64 * 3), 64), 
@@ -250,7 +260,7 @@ def Game(window, level = 1):
         
 
         player.next_frame(fps)
-        player.check_collision(floor+obstacles, screen_offset)
+        player.check_collision(floor+obstacles)
 
         window.fill(backround_color)
         player.draw(window, screen_offset)
