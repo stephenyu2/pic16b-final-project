@@ -35,13 +35,14 @@ class SquareBlock(Object):
 class Spikes(Object): 
 
     def __init__(self,x,y,width,height):
-        super().__init__(x,y,width,height,"spike")
-        image = pygame.image.load("spikes.png").convert_alpha()
-        rect = pygame.Rect(58,222,width,height)
-        surface = pygame.Surface((width,height),pygame.SRCALPHA,32)
+        super().__init__(x,y,width,height)
+        image = pygame.image.load("spike-sprite.png").convert_alpha()
+        rect = pygame.Rect(52,72,width*2,height*2)
+        surface = pygame.Surface((width*2,height*2),pygame.SRCALPHA,32)
         surface.blit(image,(0,0), rect)
-        block = pygame.transform.scale(surface, (64, 32)) 
+        block = pygame.transform.scale_by(surface, .5) 
         self.image.blit(block, (0,0))
+
 
 class Flag(Object):
     def __init__(self,x,y,width, height):
@@ -216,11 +217,12 @@ def Game(window,models,level = 1):
     elif level == 3: 
         obstacles = [SquareBlock(256+64,height-floor_height-64, 64), 
                      SquareBlock(256,height-floor_height+64, 64), 
-                     Spikes(256,height-floor_height+32, 150, 50), 
+                     Spikes(256,height-floor_height+32, 32, 32), 
+                     Spikes(256+32,height-floor_height+32, 32, 32),
                      Flag(256+(64*4),height-floor_height-64-64,64,128)]
         floor = [SquareBlock(64*i, height-floor_height,64) for i in range(10) if i != 4]
     elif level == 4: 
-        spikes = [Spikes(256 + (64 * i), height-floor_height-32, 150, 50) for i in range(6)]
+        spikes = [Spikes(256 + (32 * i), height-floor_height-32, 32, 32) for i in range(12)]
         obstacles = [SquareBlock(256 + 64,height-floor_height-64-64, 64), 
                      SquareBlock(256 - 64,height-floor_height-64, 64), 
                      SquareBlock(256 + (64 * 4),height-floor_height-(64 * 3), 64), 
@@ -228,7 +230,7 @@ def Game(window,models,level = 1):
         obstacles = obstacles + spikes
         floor = [SquareBlock(64*i, height-floor_height,64) for i in range(15)]
     elif level == 5: 
-        spikes = [Spikes(256 + (64 * i), height-floor_height-32, 150, 50) for i in range(6)]
+        spikes = [Spikes(256 + (32 * i), height-floor_height-32, 32, 32) for i in range(12)]
         obstacles = [SquareBlock(256 + 64,height-floor_height-64-64, 64), 
                      SquareBlock(256 - 64,height-floor_height-64, 64), 
                      SquareBlock(256 + (64 * 4),height-floor_height-(64 * 3), 64), 
