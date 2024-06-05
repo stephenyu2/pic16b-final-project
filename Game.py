@@ -10,6 +10,9 @@ fps = 60
 velocity = 4
 window = pygame.display.set_mode((width,height))
 
+cx = 46             # customizable, sightline center of x (default: 46)
+cy = 23             # customizable, sightline center of y (default: 23)
+
 class Object(pygame.sprite.Sprite):
     def __init__(self, x,y,width,height, name = "block"):
         super().__init__()
@@ -102,7 +105,7 @@ class Player(pygame.sprite.Sprite):
 
         self.distances = [100,100,100,100,100,100,100,100]
         self.types = [0,0,0,0,0,0,0,0]
-        self.sightlines = [[(self.rect.x+23,self.rect.y+23),(self.rect.x+23+math.sin(.25*i*math.pi)*100,self.rect.y+23+math.cos(.25*i*math.pi)*100),3] for i in range(8)]
+        self.sightlines = [[(self.rect.x+cx,self.rect.y+cy),(self.rect.x+cx+math.sin(.25*i*math.pi)*100,self.rect.y+cy+math.cos(.25*i*math.pi)*100),3] for i in range(8)]
         for object in objects:
             if pygame.Rect.colliderect(self.rect,object.rect):
                 if self.v_y > 0:
@@ -117,7 +120,7 @@ class Player(pygame.sprite.Sprite):
                 x = object.rect.clipline(self.sightlines[i][0][0],self.sightlines[i][0][1],self.sightlines[i][1][0],self.sightlines[i][1][1])
                 if x != ():
                     start = x[0]
-                    d = math.sqrt((start[0] - self.rect.x-23)**2+(start[1] - self.rect.y-23)**2)
+                    d = math.sqrt((start[0] - self.rect.x-cx)**2+(start[1] - self.rect.y-cy)**2)
                 else: d = 100
                 if d < self.distances[i]:
                     self.distances[i] = d

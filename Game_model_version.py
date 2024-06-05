@@ -10,6 +10,11 @@ floor_height = 160
 width = 600
 height = 600
 
+sl = 100            # customizable, sightline length (default: 100)
+cx = 46             # customizable, sightline center of x (default: 46)
+cy = 23             # customizable, sightline center of y (default: 23)
+
+
 class Object(pygame.sprite.Sprite):
     def __init__(self, x,y,width,height, name = "block"):
         super().__init__()
@@ -71,7 +76,7 @@ class Player(pygame.sprite.Sprite):
         self.died = False
         self.time = 0
         self.sightlines = []
-        self.distances = [100,100,100,100,100,100,100,100]
+        self.distances = [sl,sl,sl,sl,sl,sl,sl,sl]
         self.types = [0,0,0,0,0,0,0,0]
         self.name_mapping = {"block": 0, "spike": 1, "flag": 2}
 
@@ -139,9 +144,9 @@ class Player(pygame.sprite.Sprite):
             if self.direction != "right":
                 self.direction = "right"
                 self.animation_frame = 0
-        self.distances = [100,100,100,100,100,100,100,100]
+        self.distances = [sl,sl,sl,sl,sl,sl,sl,sl]
         self.types = [0,0,0,0,0,0,0,0]
-        self.sightlines = [[(self.rect.x+23,self.rect.y+23),(self.rect.x+23+math.sin(.25*i*math.pi)*100,self.rect.y+23+math.cos(.25*i*math.pi)*100),3] for i in range(8)]
+        self.sightlines = [[(self.rect.x+cx,self.rect.y+cy),(self.rect.x+cx+math.sin(.25*i*math.pi)*sl,self.rect.y+cy+math.cos(.25*i*math.pi)*sl),3] for i in range(8)]
         for object in objects:
             if pygame.Rect.colliderect(self.rect,object.rect):
                 if self.v_y > 0:
@@ -156,8 +161,8 @@ class Player(pygame.sprite.Sprite):
                 x = object.rect.clipline(self.sightlines[i][0][0],self.sightlines[i][0][1],self.sightlines[i][1][0],self.sightlines[i][1][1])
                 if x != ():
                     start = x[0]
-                    d = math.sqrt((start[0] - self.rect.x-23)**2+(start[1] - self.rect.y-23)**2)
-                else: d = 100
+                    d = math.sqrt((start[0] - self.rect.x-cx)**2+(start[1] - self.rect.y-cy)**2)
+                else: d = sl
                 if d < self.distances[i]:
                     self.distances[i] = d
                     self.types[i] = self.name_mapping[object.name]
@@ -166,11 +171,11 @@ class Player(pygame.sprite.Sprite):
     def draw(self, window, screen_offset):
         window.blit(self.sprite, (self.rect.x - screen_offset,self.rect.y))
         for i in range(8):
-            if self.distances[i] < 100 and self.types[i] == 0:
+            if self.distances[i] < sl and self.types[i] == 0:
                 x = 0
                 y = 0
                 z = 255
-            elif self.distances[i] < 100: 
+            elif self.distances[i] < sl: 
                 x = 255
                 y = 0
                 z = 0

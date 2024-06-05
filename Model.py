@@ -10,9 +10,13 @@ pygame.init()
 
 import Game_model_version
 
+# Customizable values on Model.py and Game_mode_version.py/Game.py
+
 width = 600
 height = 600
-model_type = 1 ### SEE DISCLAIMER BELOW
+model_type = 2 ### SEE DISCLAIMER BELOW
+models_per_gen = 10 # customizable (default: 10)
+level = 5           # customizable (levels 1-5)
 
 """
 VERY IMPORTANT: 
@@ -28,19 +32,29 @@ window = pygame.display.set_mode((width,height))
 
 def make_model(initializer, model_type):
     
-    if model_type == 0: 
+    if model_type == 0:                 # FNN with 1 layer and sightlines
         FNNmodel = keras.Sequential(
             [
                 keras.Input(shape = (23,)),
                 layers.Dense(10, activation = "relu", name = "layer1", kernel_initializer = initializer),
                 layers.Dense(3, name = "output")
             ])
-    elif model_type == 1: 
+    elif model_type == 1:               # FNN with 2 layers and sightlines
         FNNmodel = keras.Sequential(
             [
                 keras.Input(shape = (23,)),
                 layers.Dense(5, activation = "relu", name = "layer1", kernel_initializer = initializer),
                 layers.Dense(5, activation = "relu", name = "layer2", kernel_initializer = initializer),
+                layers.Dense(3, name = "output")
+            ])
+
+    elif model_type == 2:
+        FNNmodel = keras.Sequential(
+            [
+                keras.Input(shape = (23,)),
+                layers.Dense(4, activation = "relu", name = "layer1", kernel_initializer = initializer),
+                layers.Dense(2, activation = "relu", name = "layer2", kernel_initializer = initializer),
+                layers.Dense(4, activation = "relu", name = "layer3", kernel_initializer = initializer),
                 layers.Dense(3, name = "output")
             ])
 
@@ -52,7 +66,7 @@ fitness = []
 models = []
 best_models = []
 
-for i in range(10):
+for i in range(models_per_gen):
         model = make_model(initializer, model_type = model_type)
         models.append(model)
 
@@ -112,11 +126,11 @@ generations = 100
 best_of_gen = []
 parents = []
 for i in range(generations):
-    fitness = Game_model_version.Game(window,models, level = 5)
+    fitness = Game_model_version.Game(window,models,level)
     parent_ids = score(fitness)
     parents = [models[parent_ids[0]],models[parent_ids[1]]]
     best_of_gen.append(models[parent_ids[0]])
-    children = propagate(models[parent_ids[0]], models[parent_ids[1]], 10, initializer, model_type)
+    children = propagate(models[parent_ids[0]], models[parent_ids[1]], models_per_gen, initializer, model_type)
     models = mutate(children)+parents
 
 
