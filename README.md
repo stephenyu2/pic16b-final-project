@@ -18,19 +18,19 @@ Since this was our first time implementing reinforcement learning from scratch o
 ## Group Contributions Statement
 Our group consists of Michael Papagni, Stephen Yu, and Arianna Zhou. Here is a split of group member contributions: 
 
-Michael Papagni:
--Implemented the graphics and controls of the video game using PyGame (Weeks 7-8)
--Made and experimented with models and mutation/propogation functions; implemented sight rays (Week 9)
--Ran and compared results of models; contributed to presentation (Week 10)
+**Michael Papagni:**
+- Implemented the graphics and controls of the video game using PyGame (Weeks 7-8)
+- Made and experimented with models and mutation/propogation functions; implemented sight rays (Week 9)
+- Ran and compared results of models; contributed to presentation (Week 10)
 
-Stephen Yu:
--Completed 5 initial game levels (Week 8)
--Made a second model; adapted the mutation and propogation functions (Week 9)
+**Stephen Yu:**
+- Completed 5 initial game levels (Week 8)
+- Made a second model; adapted the mutation and propogation functions (Week 9)
 
-Arianna Zhou:
--Contributed with propogation/model selection functions (Week 8)
--Made a third model (Week 9)
--Made the presentation (Week 10)
+**Arianna Zhou:**
+- Contributed with propogation/model selection functions (Week 8)
+- Made a third model (Week 9)
+- Made the presentation (Week 10)
 
 **Initial Plan**
 -	End of Week 7: We have a fully functional 2D platformer with at least 5 levels, but without any reinforcement learning
