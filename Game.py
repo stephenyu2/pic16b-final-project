@@ -14,7 +14,31 @@ cx = 46             # customizable, sightline center of x (default: 46)
 cy = 23             # customizable, sightline center of y (default: 23)
 
 class Object(pygame.sprite.Sprite):
+    """
+    A base class for game objects.
+
+    Attributes:
+        rect (pygame.Rect): A rectangle representing the position and size of the object
+        image (pygame.Surface): A surface representing the appearance of the object
+        width (int): The width of the object
+        height (int): The height of the object
+        name (str): The name or type of the object
+
+    Methods:
+        __init__(x, y, width, height, name="block"): Initializes an Object instance with the given parameters
+        draw(window, screen_offset): Draws the object onto the specified window with an optional screen offset
+    """
     def __init__(self, x,y,width,height, name = "block"):
+        """
+        Initializes an Object instance with the given parameters.
+
+        Args:
+            x (int): The x-coordinate of the object
+            y (int): The y-coordinate of the object
+            width (int): The width of the object
+            height (int): The height of the object
+            name (str, optional): The name or type of the object. Defaults to "block"
+        """
         super().__init__()
         self.rect = pygame.Rect(x,y,width,height)
         self.image = pygame.Surface((width,height),pygame.SRCALPHA)
@@ -23,12 +47,60 @@ class Object(pygame.sprite.Sprite):
         self.name = name
 
     def draw(self, window, screen_offset):
+        """
+        Draws the object onto the specified window with an optional screen offset.
+
+        Args:
+            window: The pygame surface to draw the object onto
+            screen_offset (int): The offset of the screen, used to adjust the object's position
+        """
         window.blit(self.image,(self.rect.x - screen_offset, self.rect.y))
 
         
 class Player(pygame.sprite.Sprite):
+    """
+    A class representing the player character in the game.
 
+    Attributes:
+        rect (pygame.Rect): A rectangle representing the position and size of the player.
+        v_x (float): The horizontal velocity of the player.
+        v_y (float): The vertical velocity of the player.
+        canjump (bool): Indicates if the player is currently able to jump.
+        direction (str): The current direction the player is facing ("left" or "right").
+        animation_frame (int): The frame number of the player's animation.
+        fall_count (int): The count of frames since the player started falling.
+        win (bool): Indicates if the player has reached the flag and won the game.
+        sprites (dict): A dictionary containing sprite images for different player states.
+        flag_x (int): The x-coordinate of the flag's position.
+        flag_y (int): The y-coordinate of the flag's position.
+        died (bool): Indicates if the player has died.
+        time (int): The elapsed time in the game.
+        sightlines (list): A list containing sightlines used for collision detection.
+        distances (list): A list containing distances to obstacles detected by sightlines.
+        types (list): A list containing types of obstacles detected by sightlines.
+        name_mapping (dict): A dictionary mapping obstacle names to their types.
+
+    Methods:
+        jump(): Makes the player jump.
+        adjust_position(v_y, v_x): Adjusts the player's position based on velocity.
+        next_frame(fps): Updates the player's animation frame and position for the next frame.
+        check_collision(objects, keys): Checks for collisions with objects and updates player state.
+        draw(window, screen_offset): Draws the player and collision sightlines on the window.
+    """
+    
     def __init__(self, x , y, width, height, sprites):
+        """
+        Initializes a Player instance.
+
+        Args:
+        x (int): The x-coordinate of the player's position.
+        y (int): The y-coordinate of the player's position.
+        width (int): The width of the player's bounding box.
+        height (int): The height of the player's bounding box.
+        sprites (dict): A dictionary containing sprite images for different player states.
+        flag_x (int): The x-coordinate of the flag's position.
+        flag_y (int): The y-coordinate of the flag's position.
+        """
         self.rect = pygame.Rect(x,y,width,height)
         self.v_x = 0
         self.v_y = 0
@@ -44,14 +116,30 @@ class Player(pygame.sprite.Sprite):
         self.name_mapping = {"block": 0, "spike": 1, "flag": 2}
 
     def jump(self):
+        """
+        Makes the player jump.
+        """
         self.v_y = -6.6
         self.animation_frame = 0
 
     def adjust_position(self,v_y,v_x):
+        """
+        Adjusts the player's position based on velocity.
+
+        Args:
+        v_y (float): The vertical velocity.
+        v_x (float): The horizontal velocity.
+        """
         self.rect.x += v_x
         self.rect.y += v_y
 
     def next_frame(self,fps):
+        """
+        Updates the player's animation frame and position for the next frame.
+
+        Args:
+        fps (int): The frames per second of the game.
+        """
         self.v_y += max(.3,(self.fall_count/fps))
         self.adjust_position(self.v_y,self.v_x)
         self.fall_count += 1
@@ -70,6 +158,17 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.sprite.get_rect(topleft = (self.rect.x,self.rect.y))
     
     def check_collision(self,objects):
+        """
+        Checks for collisions with objects and updates player state.
+
+        Args:
+        objects (list): A list of game objects to check for collisions.
+        keys (numpy.ndarray): A numpy array representing player input.
+
+        The method updates the player's velocity, direction, and animation frame based on collision 
+        detection with objects in the game world. It also updates the player's sightlines for 
+        obstacle detection and adjusts player position based on collisions.
+        """
         keys = pygame.key.get_pressed()
         self.v_x = 0
 
@@ -145,7 +244,27 @@ class Player(pygame.sprite.Sprite):
             pygame.draw.line(window,(x,y,z),tuple(map(lambda i, j: i + j, self.sightlines[i][0], (-screen_offset,0))),tuple(map(lambda i, j: i + j, self.sightlines[i][1], (-screen_offset,0))),self.sightlines[i][2])
 
 class SquareBlock(Object):
+    """
+    A class representing a square block object in a game.
+
+    Inherits from:
+        Object: A base class for game objects
+
+    Attributes:
+        Inherits all attributes from the Object class
+
+    Methods:
+        __init__(x, y, width): Initializes a SquareBlock instance with the given parameters
+    """
     def __init__(self,x,y,width):
+        """
+        Initializes a SquareBlock instance with the given parameters.
+
+        Args:
+            x (int): The x-coordinate of the block
+            y (int): The y-coordinate of the block
+            width (int): The width and height of the square block
+        """
         super().__init__(x,y,width,width)
         image = pygame.image.load("Terrain.png").convert_alpha()
         rect = pygame.Rect(208,144,width,width)
@@ -155,8 +274,30 @@ class SquareBlock(Object):
         self.image.blit(block, (0,0))
 
 class Spikes(Object): 
+    """
+    A class representing a spikes object in a game.
 
+    Inherits from:
+        Object: A base class for game objects
+
+    Attributes:
+        Inherits all attributes from the Object class
+
+    Methods:
+        __init__(x, y, width, height): Initializes a Spikes instance with the given parameters
+    """
+    
     def __init__(self,x,y,width,height):
+        """
+        Initializes a Spikes instance with the given parameters.
+
+        Args:
+            x (int): The x-coordinate of the spikes' position
+            y (int): The y-coordinate of the spikes' position
+            width (int): The width of the spikes
+            height (int): The height of the spikes
+        """
+        
         super().__init__(x,y,width,height, "spike")
         image = pygame.image.load("spike-sprite.png").convert_alpha()
         rect = pygame.Rect(56,72,width*2,height*2)
@@ -166,7 +307,31 @@ class Spikes(Object):
         self.image.blit(block, (0,0))
 
 class Flag(Object):
+    """
+    A class representing a flag object in a game.
+
+    Inherits from:
+        Object: A base class for game objects
+
+    Attributes:
+        x (int): The x-coordinate of the flag
+        y (int): The y-coordinate of the flag
+        width (int): The width of the flag
+        height (int): The height of the flag
+
+    Methods:
+        __init__(x, y, width, height): Initializes a Flag object with the given parameters
+    """
     def __init__(self,x,y,width, height):
+        """
+        Initializes a Flag object with the given parameters
+
+        Args:
+            x (int): The x-coordinate of the flag's position
+            y (int): The y-coordinate of the flag's position
+            width (int): The width of the flag
+            height (int): The height of the flag
+        """
         super().__init__(x,y,width,height,"flag")
         image = pygame.image.load("flagpole.png").convert_alpha()
         rect = pygame.Rect(420,0,width*12,height*28)
@@ -177,6 +342,27 @@ class Flag(Object):
 
 
 def Game(window, level = 1):
+    """
+    Runs the game simulation with the provided models and level.
+
+    Args:
+        window: The Pygame window surface.
+        models (list): A list of models used to control the players.
+        level (int, optional): The level of the game to be played. Defaults to 1.
+
+    Returns:
+        list: A list containing the game results for each player.
+
+    This function initializes the game environment, including player characters, obstacles, 
+    and floor elements based on the specified level. It then runs the game simulation, 
+    updating player actions and positions based on model predictions and collisions 
+    with game elements. The function continues until either all players reach the end 
+    of the level, time runs out, or a player dies. The function returns a list containing 
+    the game results for each player, including whether they won, their final position, 
+    the time taken, and whether they died.
+
+    """
+    
     pygame.display.set_caption("1 million Kirby's fail at walking")
     clock = pygame.time.Clock()
     kirbypng = pygame.image.load("kirby.png").convert_alpha()
