@@ -2,6 +2,8 @@
 import pygame
 import math
 import numpy as np
+import imageio.v3 as iio
+import pygame.pixelcopy
 pygame.init()
 
 #setting backround color to sky blue
@@ -22,7 +24,6 @@ height = 600
 sl = 100            # customizable, sightline length (default: 100)
 cx = 23             # customizable, sightline center of x (default: 46)
 cy = 23             # customizable, sightline center of y (default: 23)
-
 
 #defining the object class
 class Object():
@@ -60,6 +61,30 @@ class Object():
         #blitting self.image to window at the objects (x,y) coordinate, accounting for screen offset
         window.blit(self.image,(self.rect.x - screen_offset, self.rect.y))
 
+
+#defining function to convert from numpy array with alpha channel to pygame surface
+#this function will be needed in the subclasses of Object
+def make_surface(array):
+    """
+    takes 3d numpy array and converts it into a pygame surface
+    Args:
+        array: 3d numpy array representing a png image with alpha channel
+    Returns:
+        surface: pygame surface 
+    
+    """
+    #initializing empty surface with the same size as the image
+    surface = pygame.Surface((array.shape[0],array.shape[1]), pygame.SRCALPHA)
+
+    #Copying the rgb channels to the surface using pixelcopy()
+    pygame.pixelcopy.array_to_surface(surface, array[:,:,0:3])
+
+    #mapping the alpha channel to the surface using memory allocation
+    alpha_channel = np.array(surface.get_view("a"), copy = False)
+    alpha_channel[:,:] = array[:,:,3]
+
+    return surface
+
 #defining the class SquareBlock, inheriting from object
 class SquareBlock(Object):
     def __init__(self,x,y,width):
@@ -75,7 +100,8 @@ class SquareBlock(Object):
         super().__init__(x,y,width,width,"block")
 
         #loading png containing the block sprite and allowing for transparency
-        image = pygame.image.load("Terrain.png").convert_alpha()
+        im = iio.imread("https://raw.githubusercontent.com/stephenyu2/pic16b-final-project/main/Terrain.png")
+        image = make_surface(im.swapaxes(0,1))
 
         #Initalixing rect with the pixel coordinates of the sprite in Terrain.png and size of the block
         rect = pygame.Rect(208,144,width,width)
@@ -109,7 +135,8 @@ class Spikes(Object):
         super().__init__(x,y,width,height,"spike")
 
         #loading png containing the spike sprite and allowing for transparency
-        image = pygame.image.load("spike-sprite.png").convert_alpha()
+        im = iio.imread("https://raw.githubusercontent.com/stephenyu2/pic16b-final-project/main/Spike-Sprite.png")
+        image = make_surface(im.swapaxes(0,1))
 
         #Initalixing rect with the pixel coordinates of the sprite in spike-sprite.png and size of the spike sprite
         #width and height are multiplied by 2 to account for smaller size of spike
@@ -144,7 +171,9 @@ class Flag(Object):
         super().__init__(x,y,width,height,"flag")
 
         #loading png containing the spike sprite and allowing for transparency
-        image = pygame.image.load("flagpole.png").convert_alpha()
+        im = iio.imread("https://raw.githubusercontent.com/stephenyu2/pic16b-final-project/main/flagpole4.png")
+        image = make_surface(im.swapaxes(0,1))
+
 
         #Initalixing rect with the pixel coordinates of the sprite in flagpole.png and size of the spike sprite
         #width and height are factored to account for the larger resolution of flagpole.png
@@ -449,7 +478,8 @@ class Player():
 def Game(window,models,level = 1, modeltype = 1):
     """
     launches the game into a new window and runs a list of models as different players simultaneously. 
-    Closes after every model has died or until the maximum number of frames is reached
+    Closes after every model has died or until the maximum number of frames is reached.
+    Also tracks the performance of each model in
 
     Args:
         window: window on which the game is drawn
@@ -457,7 +487,8 @@ def Game(window,models,level = 1, modeltype = 1):
         level: accepts integers 1 - 5. Controls which level the models will play
         modeltype: accpets integers 0 - 4. Controls what inputs the models receive to inform their predictions
     Returns:
-        list of lists containing data on the performance of each model
+        list of lists containing data on the performance of each model.
+        data includes player position, dead/alive state, win/lose state, and time spent reaching the flag
     """
     #sets the name of the window
     pygame.display.set_caption("1 million Kirby's fail at walking")  
@@ -468,8 +499,9 @@ def Game(window,models,level = 1, modeltype = 1):
 
     #CONSTRUCTING THE ANIMATIONS USING A SPRITE SHEET:
 
-    #loading the sprite sheet for the player character, allowing for transparency with convert_alpha()
-    kirbypng = pygame.image.load("kirby.png").convert_alpha()
+    #loading the sprite sheet for the player character, allowing for transparency with rbga
+    im = iio.imread("https://raw.githubusercontent.com/stephenyu2/pic16b-final-project/main/kirby.png")
+    kirbypng = make_surface(im.swapaxes(0,1))
     
     #defining the dict which will store a list of sprites for each animation
     animation_dict = {}
