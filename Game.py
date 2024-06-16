@@ -98,8 +98,6 @@ class Player(pygame.sprite.Sprite):
         width (int): The width of the player's bounding box.
         height (int): The height of the player's bounding box.
         sprites (dict): A dictionary containing sprite images for different player states.
-        flag_x (int): The x-coordinate of the flag's position.
-        flag_y (int): The y-coordinate of the flag's position.
         """
         self.rect = pygame.Rect(x,y,width,height)
         self.v_x = 0
@@ -163,7 +161,6 @@ class Player(pygame.sprite.Sprite):
 
         Args:
         objects (list): A list of game objects to check for collisions.
-        keys (numpy.ndarray): A numpy array representing player input.
 
         The method updates the player's velocity, direction, and animation frame based on collision 
         detection with objects in the game world. It also updates the player's sightlines for 
@@ -333,7 +330,7 @@ class Flag(Object):
             height (int): The height of the flag
         """
         super().__init__(x,y,width,height,"flag")
-        image = pygame.image.load("flagpole.png").convert_alpha()
+        image = pygame.image.load("flagpole4.png").convert_alpha()
         rect = pygame.Rect(420,0,width*12,height*28)
         surface = pygame.Surface((width*12,height*28),pygame.SRCALPHA,32)
         surface.blit(image,(0,0),rect)
