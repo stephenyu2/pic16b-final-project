@@ -25,7 +25,7 @@ sl = 100            # customizable, sightline length (default: 100)
 cx = 23             # customizable, sightline center of x (default: 46)
 cy = 23             # customizable, sightline center of y (default: 23)
 
-#defining the object class
+# defining the object class
 class Object():
     def __init__(self, x,y,width,height, name = "block"):
         """
@@ -38,13 +38,13 @@ class Object():
             height: height of the hitbox for the Object in pixels
             name: string used to identify the type of object, default "block"
         """
-        #initializing a rect from the given coordinate and hitbox size
+        # initializing a rect from the given coordinate and hitbox size
         self.rect = pygame.Rect(x,y,width,height)
 
-        #initializing pygame surface with the given size, SRCALPHA allowing for transparency
+        # initializing pygame surface with the given size, SRCALPHA allowing for transparency
         self.image = pygame.Surface((width,height),pygame.SRCALPHA)
 
-        #initializing the other variables as given
+        # initializing the other variables as given
         self.width = width
         self.height = height
         self.name = name
@@ -52,6 +52,7 @@ class Object():
     def draw(self, window, screen_offset):
         """
         blits the Object to the screen
+        
         Args:
             self: Object to be blitted
             window: window where self will be blitted
@@ -154,7 +155,7 @@ class Spikes(Object):
         #blitting the scaled surface (stored locally) onto the Object class variable image, another pygame surface
         self.image.blit(block, (0,0))
 
-#defininf the Flag class, inheriting from Object
+#defining the Flag class, inheriting from Object
 class Flag(Object):
     def __init__(self,x,y,width, height):
         """
@@ -175,7 +176,7 @@ class Flag(Object):
         image = make_surface(im.swapaxes(0,1))
 
 
-        #Initalixing rect with the pixel coordinates of the sprite in flagpole.png and size of the spike sprite
+        #Initalizing rect with the pixel coordinates of the sprite in flagpole.png and size of the spike sprite
         #width and height are factored to account for the larger resolution of flagpole.png
         rect = pygame.Rect(420,0,width*12,height*28)
 
